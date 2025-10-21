@@ -2,11 +2,6 @@ use rand::Rng;
 
 use crate::utils::vec_func;
 use super::ant_map_traits::{ AntMapInfo, AntMap };
-use super::ant_maps::types::node::NodeType;
-use super::ant_maps::types::map::direcional::DirType;
-use super::ant_maps::types::map::initialization::Initialized;
-
-
 
 pub struct Ant {
     pub path: Vec<usize>,
@@ -137,11 +132,10 @@ impl Ant {
 
         Err("No result found")
     }
-
 }
 
 
 #[cfg(test)]
 mod tests {
-    use super::*; 
+    use super::*;
 }

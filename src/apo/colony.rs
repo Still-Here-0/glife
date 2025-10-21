@@ -1,7 +1,5 @@
 
-use rand::distr;
 
-use crate::apo::ant;
 use super::ants::Ants;
 use super::apo_fases::APOFases;
 use super::ant_map_traits::AntMap;
@@ -35,6 +33,8 @@ pub struct Apo2D<DT: DirType, NT: NodeType, IT: InitType> {
     // APO extra parameters
     fases: Vec<APOFases>,
 }
+
+/* #region Uninitialized APO */
 
 /* #region CREATION */
 
@@ -147,6 +147,10 @@ impl<DT: DirType, NT: NodeType> Apo2D<DT, NT, Uninitialized> {
         }
     }
 }
+
+/* #endregion */
+
+/* #region Initialized APO */
 
 impl<DT: DirType + 'static, NT: NodeType + 'static> Apo2D<DT, NT, Initialized> 
 where
@@ -284,6 +288,9 @@ where
 
 }
 
+/* #endregion */
+
+
 #[cfg(test)]
 mod tests {
     use super::*; 
@@ -300,7 +307,7 @@ mod tests {
             Node2D::<Priced>::new(2.0, 0.0, 1.0, None),
             Node2D::<Priced>::new(1.0, 0.0, 1.0, None),
         ];
-        let mut apo = Apo2D::new_unidi_priced(
+        let apo = Apo2D::new_unidi_priced(
             nodes,
             None, 
             None, 
@@ -308,11 +315,12 @@ mod tests {
             None
         );
 
-        let mut apo = apo.init_map(None);
+        let apo = apo.init_map(None);
         
         let result = apo.find_best_path(0);
 
         assert_eq!(result.distance, 8.0);
+        assert_eq!(result.path.len(), 8);
     }
 
 }
