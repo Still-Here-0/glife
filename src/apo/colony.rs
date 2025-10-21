@@ -1,5 +1,4 @@
 
-
 use super::ants::Ants;
 use super::apo_fases::APOFases;
 use super::ant_map_traits::AntMap;
@@ -34,10 +33,9 @@ pub struct Apo2D<DT: DirType, NT: NodeType, IT: InitType> {
     fases: Vec<APOFases>,
 }
 
-/* #region Uninitialized APO */
+/* #region UNINITIALIZED APO */
 
-/* #region CREATION */
-
+/* #region DIRECTION TYPE AND NODE TYPE SPECIFIC  */
 impl Apo2D<Unidirecional, Priced, Uninitialized> {
     pub fn new_unidi_priced(
         nodes: Vec<Node2D<Priced>>, 
@@ -73,10 +71,9 @@ impl Apo2D<Unidirecional, Unpriced, Uninitialized> {
 impl Apo2D<Bidirecional, Unpriced, Uninitialized> {
     pub fn new_bidi_unpriced(nodes: Vec<Node2D<Unpriced>>) -> Self { todo!() }
 }
-
 /* #endregion */
 
-/* #region ADDING NODES */
+/* #region NODE SPECIFIC */
 impl<DT: DirType> Apo2D<DT, Priced, Uninitialized> {
     pub fn add_node(&mut self, x: f64, y: f64, price: f64, name: Option<String>) {
         self.owned_map.add(x, y, price, name);
@@ -88,9 +85,9 @@ impl<DT: DirType> Apo2D<DT, Unpriced, Uninitialized> {
         self.owned_map.add(x, y, name);
     }
 }
-
 /* #endregion */
 
+/* #region GENERIC */
 impl<DT: DirType, NT: NodeType> Apo2D<DT, NT, Uninitialized> {
     fn set_default(
         map: Map2D<DT, NT>, 
@@ -147,10 +144,11 @@ impl<DT: DirType, NT: NodeType> Apo2D<DT, NT, Uninitialized> {
         }
     }
 }
+/* #endregion */
 
 /* #endregion */
 
-/* #region Initialized APO */
+/* #region INITIALIZED APO */
 
 impl<DT: DirType + 'static, NT: NodeType + 'static> Apo2D<DT, NT, Initialized> 
 where
@@ -290,7 +288,6 @@ where
 
 /* #endregion */
 
-
 #[cfg(test)]
 mod tests {
     use super::*; 
@@ -320,7 +317,7 @@ mod tests {
         let result = apo.find_best_path(0);
 
         assert_eq!(result.distance, 8.0);
-        assert_eq!(result.path.len(), 8);
+        assert_eq!(result.path[0].len(), 9);
     }
 
 }

@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
+use rand::rand_core::le;
 use std::marker::PhantomData;
 
-use rand::rand_core::le;
 
 use super::super::types::map::direcional::{Bidirecional, DirType, Unidirecional};
 use super::super::types::map::initialization::{InitType, Initialized, Uninitialized};
@@ -18,13 +18,27 @@ pub struct Map2D<DirecT: DirType, NodeT: NodeType, InitT: InitType = Uninitializ
     initialization: PhantomData<InitT>,
 }
 
-/* #region STRUCT FUNCTIONS */
+impl<DT: DirType, NT: NodeType, IT: InitType> Map2D<DT, NT, IT> {
+    pub fn get_nodes(&self) -> &Vec<Node2D<NT>> { &self.nodes }
 
-/* #region CREATION */
+    pub fn get_empty_map_info(&self) -> Vec<Vec<f64>> {
+        
+        let mut empty_map_info = Vec::<Vec<f64>>::new();
+
+        for line in self.distances.iter() {
+            empty_map_info.push(vec![0.0; line.len()]);
+        }
+        
+        empty_map_info
+    }
+}
+
+/* #region UNINITIALIZED */
+
+/* #region DIRECTION TYPE SPECIFIC */
 impl<NT: NodeType> Map2D<Bidirecional, NT, Uninitialized> {
-    pub fn new(nodes: Vec<Node2D<NT>>) -> Map2D<Bidirecional, NT, Uninitialized> {
-        todo!()
-    } // How do I make it possible for the user to define different distances from one node to another?
+    // How do I make it possible for the user to define different distances from one node to another?
+    pub fn new(nodes: Vec<Node2D<NT>>) -> Map2D<Bidirecional, NT, Uninitialized> { todo!() }
 }
 
 impl<NT: NodeType> Map2D<Unidirecional, NT, Uninitialized> {
@@ -40,52 +54,7 @@ impl<NT: NodeType> Map2D<Unidirecional, NT, Uninitialized> {
 }
 /* #endregion */
 
-/* #region HELPERS */
-
-/* #region ANT MAP HELPER */
-impl<NT: NodeType, IT: InitType> AntMapHelper for Map2D<Unidirecional, NT, IT> {
-    fn helper_add_to_info(info: &mut Vec<Vec<f64>>, value: f64, mut start_node: usize, mut end_node: usize) {
-        
-        if start_node == end_node { return; }
-
-        if start_node < end_node { (start_node, end_node) = (end_node, start_node); }
-
-        info[start_node][end_node] += value;
-    }
-}
-
-impl<NT: NodeType, IT: InitType> AntMapHelper for Map2D<Bidirecional, NT, IT>{
-    fn helper_add_to_info(info: &mut Vec<Vec<f64>>, value: f64, mut start_node: usize, mut end_node: usize) {
-        
-        if start_node == end_node { return; }
-
-        info[start_node][end_node] += value;
-    }
-}
-/* #endregion */
-
-/* #endregion */
-
-/* #endregion */
-
-impl<DT: DirType, NT: NodeType, IT: InitType> Map2D<DT, NT, IT> {
-    pub fn get_nodes(&self) -> &Vec<Node2D<NT>> {
-        &self.nodes
-    }
-
-    pub fn get_empty_map_info(&self) -> Vec<Vec<f64>> {
-        
-        let mut empty_map_info = Vec::<Vec<f64>>::new();
-
-        for line in self.distances.iter() {
-            empty_map_info.push(vec![0.0; line.len()]);
-        }
-        
-        empty_map_info
-    }
-}
-
-/* #region UNINITIALIZED NODE TYPE SPECIFIC IMPLEMENTATIONS */
+/* #region NODE TYPE SPECIFIC */
 impl<DT: DirType> Map2D<DT, Unpriced, Uninitialized> {
     pub fn add(&mut self, x: f64, y: f64, name: Option<String>) {
         let node = Node2D::<Unpriced>::new(x, y, name);
@@ -101,7 +70,6 @@ impl<DT: DirType> Map2D<DT, Priced, Uninitialized> {
 }
 /* #endregion */
 
-/* #region GENERIC MAP INITIALIZATION */
 impl<DT: DirType, NT: NodeType> Map2D<DT, NT, Uninitialized> {
     pub fn init_map(mut self, phero_initializer: Option<f64>) -> Map2D<DT, NT, Initialized> {
         let phero_initializer = phero_initializer.unwrap_or(1.0);
@@ -129,9 +97,9 @@ impl<DT: DirType, NT: NodeType> Map2D<DT, NT, Uninitialized> {
         }
     }
 }
+
 /* #endregion */
 
-/* #region INITIALIZED GENERIC IMPLEMENTATION */
 impl<DT: DirType, NT: NodeType> Map2D<DT, NT, Initialized> {
     pub fn get_distances(&self) -> &Vec<Vec<f64>> {
         &self.distances
@@ -159,9 +127,8 @@ impl<DT: DirType, NT: NodeType> Map2D<DT, NT, Initialized> {
         Result::Ok(())
     }
 }
-/* #endregion */
 
-/* #region IMPLEMENTING ANT MAP DISTANCES */
+/* #region ANT-MAP-DISTANCES */
 impl<NT: NodeType> AntMapDistances for Map2D<Unidirecional, NT, Initialized> {
     fn fetch_info(&self, start_node: usize, info: AntMapInfo) -> Vec<f64> {
         let mut distances = Vec::new();
@@ -207,21 +174,13 @@ impl<NT: NodeType> AntMapDistances for Map2D<Unidirecional, NT, Initialized> {
 }
 
 impl<NT: NodeType> AntMapDistances for Map2D<Bidirecional, NT, Initialized> {
-    fn fetch_info(&self, start_node: usize, info: AntMapInfo) -> Vec<f64> {
-        todo!()
-    }
-    fn fetch_value_from(
-        &self,
-        info: AntMapInfo,
-        start_node: usize,
-        end_node: usize,
-    ) -> Result<f64, String> {
-        todo!()
-    }
+    fn fetch_info(&self, start_node: usize, info: AntMapInfo) -> Vec<f64> { todo!() }
+
+    fn fetch_value_from(&self, info: AntMapInfo, start_node: usize, end_node: usize) -> Result<f64, String> { todo!() }
 }
 /* #endregion */
 
-/* #region IMPLEMENTING ANT MAP NODES */
+/* #region ANT-MAP-NODES */
 impl<DT: DirType> AntMapNodes for Map2D<DT, Priced, Initialized> {
     fn fetch_total_node_gain(&self) -> f64 {
         self.nodes.iter().map(|node| node.get_goods()).sum::<f64>()
@@ -243,11 +202,7 @@ impl<DT: DirType> AntMapNodes for Map2D<DT, Unpriced, Initialized> {
 }
 /* #endregion */
 
-impl<DT: DirType, NT: NodeType> AntMapGeneric for Map2D<DT, NT, Initialized> {
-    fn fetch_number_of_nodes(&self) -> usize { self.nodes.len() }
-}
-
-/* #region IMPLEMENTING ANT MAP PHEROMONES */
+/* #region ANT-MAP-PHEROMONES */
 impl<NT: NodeType> AntMapPheromones for Map2D<Unidirecional, NT, Initialized> {
     fn update_pheromone(&mut self, mut start_node: usize, mut end_node: usize, new_value: f64) {
         if start_node == end_node {
@@ -268,6 +223,32 @@ impl<NT: NodeType> AntMapPheromones for Map2D<Bidirecional, NT, Initialized> {
     }
 }
 /* #endregion */
+
+/* #region ANT-MAP-HELPER */
+impl<NT: NodeType, IT: InitType> AntMapHelper for Map2D<Unidirecional, NT, IT> {
+    fn helper_add_to_info(info: &mut Vec<Vec<f64>>, value: f64, mut start_node: usize, mut end_node: usize) {
+        
+        if start_node == end_node { return; }
+
+        if start_node < end_node { (start_node, end_node) = (end_node, start_node); }
+
+        info[start_node][end_node] += value;
+    }
+}
+
+impl<NT: NodeType, IT: InitType> AntMapHelper for Map2D<Bidirecional, NT, IT>{
+    fn helper_add_to_info(info: &mut Vec<Vec<f64>>, value: f64, mut start_node: usize, mut end_node: usize) {
+        
+        if start_node == end_node { return; }
+
+        info[start_node][end_node] += value;
+    }
+}
+/* #endregion */
+
+impl<DT: DirType, NT: NodeType> AntMapGeneric for Map2D<DT, NT, Initialized> {
+    fn fetch_number_of_nodes(&self) -> usize { self.nodes.len() }
+}
 
 #[cfg(test)]
 mod tests {
